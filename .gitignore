@@ -1,0 +1,26 @@
+.terraform/
+
+# State files
+*.tfstate
+*.tfstate.*
+
+# Crash files
+crash.log
+.terraform.lock.html
+
+# Variables files, ensuring no sensitive data is pushed
+*.tfvars
+*.tfvars.json
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform apply ingore files
+.terraform.tfstate.lock.info
+
+# CLI configuration files
+.terraformrc
+terraform.rc
