@@ -4,7 +4,7 @@
 variable "project" {
   type        = string
   description = "Project name prefix"
-  default     = "DTAP"
+  default     = "dtap"
 }
 
 // AWS region to deploy into
