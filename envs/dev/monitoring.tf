@@ -30,18 +30,18 @@ resource "aws_security_group" "monitoring_sg" {
 
   // Allow Grafana 3000 and Prometheus 9090 from VPN and VPN SG
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["10.8.0.0/24"]
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    cidr_blocks     = ["10.8.0.0/24"]
     security_groups = [aws_security_group.vpn.id]
   }
 
   ingress {
-    from_port   = 9090
-    to_port     = 9090
-    protocol    = "tcp"
-    cidr_blocks = ["10.8.0.0/24"]
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    cidr_blocks     = ["10.8.0.0/24"]
     security_groups = [aws_security_group.vpn.id]
   }
 

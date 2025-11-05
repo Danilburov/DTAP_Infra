@@ -30,22 +30,24 @@ output "monitoring_private_ip" {
   value       = aws_instance.monitoring.private_ip
 }
 
-output "alb_dns_name" {
-  value       = aws_lb.app_alb.dns_name
-  description = "Publieke DNS van de ALB (open in je browser)"
-}
+//Duplicates
 
-output "rds_endpoint" {
-  value       = aws_db_instance.app_db.address
-  description = "Endpoint van de RDS database"
-}
+# output "alb_dns_name" {
+#   value       = aws_lb.app_alb.dns_name
+#   description = "Publieke DNS van de ALB (open in je browser)"
+# }
 
-output "private_zone_id" {
-  value       = aws_route53_zone.private_zone.zone_id
-  description = "ID van de private hosted zone"
-}
+# output "rds_endpoint" {
+#   value       = aws_db_instance.app_db.address
+#   description = "Endpoint van de RDS database"
+# }
 
-output "vpc_id" {
-  value       = aws_vpc.main.id
-  description = "VPC ID"
-}
+# output "private_zone_id" {
+#   value       = aws_route53_zone.private_zone.zone_id
+#   description = "ID van de private hosted zone"
+# }
+
+# output "vpc_id" {
+#   value       = aws_vpc.main.id
+#   description = "VPC ID"
+# }
