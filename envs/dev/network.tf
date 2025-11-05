@@ -10,10 +10,10 @@ locals {
   az_a = data.aws_availability_zones.this.names[0]
   az_b = data.aws_availability_zones.this.names[1]
 
-  public_cidr_a      = "10.0.1.0/24"
-  public_cidr_b      = "10.0.11.0/24"
-  private_app_cidr_a = "10.0.2.0/24"
-  private_app_cidr_b = "10.0.12.0/24"
+  public_cidr_a       = "10.0.1.0/24"
+  public_cidr_b       = "10.0.11.0/24"
+  private_app_cidr_a  = "10.0.2.0/24"
+  private_app_cidr_b  = "10.0.12.0/24"
   private_data_cidr_a = "10.0.3.0/24"
   private_data_cidr_b = "10.0.13.0/24"
 }

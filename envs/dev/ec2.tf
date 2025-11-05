@@ -31,18 +31,18 @@ resource "aws_launch_template" "app" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(var.tags, { Name = "${var.project}-app" })
+    tags          = merge(var.tags, { Name = "${var.project}-app" })
   }
 }
 
 // Auto Scaling Group for app
 resource "aws_autoscaling_group" "app" {
-  name                = "${var.project}-asg"
-  vpc_zone_identifier = [aws_subnet.private_app_a.id, aws_subnet.private_app_b.id]
-  min_size            = 1
-  desired_capacity    = 1
-  max_size            = 2
-  health_check_type   = "EC2"
+  name                      = "${var.project}-asg"
+  vpc_zone_identifier       = [aws_subnet.private_app_a.id, aws_subnet.private_app_b.id]
+  min_size                  = 1
+  desired_capacity          = 1
+  max_size                  = 2
+  health_check_type         = "EC2"
   health_check_grace_period = 60
 
   launch_template {
