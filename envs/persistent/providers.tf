@@ -1,0 +1,19 @@
+terraform {
+  required_version = ">= 1.5.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.50"
+    }
+  }
+
+  # Separate backend for persistent resources
+  backend "local" {
+    path = "terraform-persistent.tfstate"
+  }
+}
+
+provider "aws" {
+  region  = var.region
+}
+
