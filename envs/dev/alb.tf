@@ -47,7 +47,7 @@ resource "aws_alb" "dtap-backend-alb" {
   internal = false
   load_balancer_type = "application"
   security_groups = [aws_security_group.dtap-backend-alb-sg]
-  subnets = [awaws_subnet.public_a.id, aws_subnet.public_b.ids]
+  subnets = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 }
 
 //Target group for the dtap-backend-alb
