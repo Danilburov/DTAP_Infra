@@ -140,9 +140,12 @@ resource "aws_security_group" "vpn" {
 
 # Reference the persistent EIP from the persistent stack
 data "terraform_remote_state" "persistent" {
-  backend = "local"
+  backend = "s3"
   config = {
-    path = "../persistent/terraform-persistent.tfstate"
+    bucket = "dtap-terraform-state-bucket"
+    key = "envs/persistent/terraform.tfstate"
+    region = "eu-central-1"
+    dynamodb_table = "dtap-terraform-state-lock"
   }
 }
 
