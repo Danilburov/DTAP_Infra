@@ -8,12 +8,6 @@ resource "aws_db_subnet_group" "db_subnets" {
   tags = merge(var.tags, { Name = "${var.project}-db-subnets" })
 }
 
-// Random DB password
-resource "random_password" "db_password" {
-  length  = 16
-  special = false
-}
-
 // Postgres instance
 resource "aws_db_instance" "app_db" {
   identifier              = "${var.project}-db"
@@ -22,11 +16,12 @@ resource "aws_db_instance" "app_db" {
   instance_class          = var.db_instance_class
   allocated_storage       = 20
   storage_type            = "gp2" // consider gp3
+  db_name = "dtapdb"
   db_subnet_group_name    = aws_db_subnet_group.db_subnets.name
   vpc_security_group_ids  = [aws_security_group.rds_sg.id]
-  username                = "appuser"
-  password                = random_password.db_password.result
-  publicly_accessible     = false
+  username                = "postgres"
+  password                = "rWahgRZsoLHKAJHxquwvGsCLs"
+  publicly_accessible     = true
   multi_az                = false
   skip_final_snapshot     = true
   deletion_protection     = false
