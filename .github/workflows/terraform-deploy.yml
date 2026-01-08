@@ -33,7 +33,7 @@ jobs:
         working-directory: envs/persistent
         run: |
           terraform init \
-            -backend-config=..dev/backend.hcl \
+            -backend-config=../dev/backend.hcl \
             -backend-config="key=envs/persistent/terraform.tfstate"
 
       - name: Persistent - Terraform Plan
