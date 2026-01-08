@@ -13,10 +13,6 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: envs/dev
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,16 +28,35 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Terraform Init
-        run: terraform init -backend-config=backend.hcl
+      #The backend.hcl file needs to be configured for the persistence and for the entire /dev folder - here it starts
+      - name: Persistent - Terraform Init
+        working-directory: envs/persistent
+        run: |
+          terraform init \
+            -backend-config=backend.hcl \
+            -backend-config="key=envs/persistent/terraform.tfstate"
 
-        #Just for debugging purposes
-      - name: Show backend.hcl contents
-        run: cat backend.hcl
+      - name: Persistent - Terraform Plan
+        working-directory: envs/persistent
+        run: terraform plan
 
+      - name: Persistent - Terraform Apply
+        working-directory: envs/persistent
+        run: terraform apply -auto-approve
 
-      - name: Terraform Plan
-        run: terraform plan 
-        
-      - name: Terraform Apply
+      - name: Dev - Terraform Init
+        working-directory: envs/dev
+        run: |
+          terraform init \
+            -backend-config=backend.hcl \
+            -backend-config="key=envs/dev/terraform.tfstate"
+
+      #Here it ends, it is very important because the vpn.tf file cannot read the storage if it is not initialized
+
+      - name: Dev - Terraform Plan
+        working-directory: envs/dev
+        run: terraform plan
+
+      - name: Dev - Terraform Apply
+        working-directory: envs/dev
         run: terraform apply -auto-approve
