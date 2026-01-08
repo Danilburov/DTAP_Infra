@@ -70,7 +70,7 @@ resource "aws_subnet" "private_app_a" {
   availability_zone = local.az_a
 
   tags = merge(var.tags, {
-    Name = "${var.project}-app-a"
+    Name = "${var.project}-private-app-a"
     Tier = "app"
   })
 }
@@ -81,7 +81,7 @@ resource "aws_subnet" "private_app_b" {
   availability_zone = local.az_b
 
   tags = merge(var.tags, {
-    Name = "${var.project}-app-b"
+    Name = "${var.project}-private-app-b"
     Tier = "app"
   })
 }
@@ -93,7 +93,7 @@ resource "aws_subnet" "private_data_a" {
   availability_zone = local.az_a
 
   tags = merge(var.tags, {
-    Name = "${var.project}-data-a"
+    Name = "${var.project}-private-data-a"
     Tier = "data"
   })
 }
@@ -104,7 +104,7 @@ resource "aws_subnet" "private_data_b" {
   availability_zone = local.az_b
 
   tags = merge(var.tags, {
-    Name = "${var.project}-data-b"
+    Name = "${var.project}-private-data-b"
     Tier = "data"
   })
 }

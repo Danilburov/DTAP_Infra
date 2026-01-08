@@ -3,7 +3,10 @@
 // Subnet group across data subnets
 resource "aws_db_subnet_group" "db_subnets" {
   name       = "${var.project}-db-subnets"
-  subnet_ids = [aws_subnet.private_data_a.id, aws_subnet.private_data_b.id]
+  # subnet_ids = [aws_subnet.private_data_a.id, aws_subnet.private_data_b.id]
+
+  //Changed the subnets to be only public for easier connectivity
+  subnet_ids = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
   tags = merge(var.tags, { Name = "${var.project}-db-subnets" })
 }
