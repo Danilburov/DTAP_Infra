@@ -46,7 +46,7 @@ resource "aws_alb" "dtap-backend-alb" {
   name = "dtap-backend-alb"
   internal = false
   load_balancer_type = "application"
-  security_groups = [aws_security_group.dtap-backend-alb-sg]
+  security_groups = [aws_security_group.dtap-backend-alb-sg.id]
   subnets = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 }
 
