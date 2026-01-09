@@ -51,7 +51,7 @@ resource "aws_ecs_task_definition" "iac-dtap-frontend-dev"{
 
     container_definitions = jsonencode([{
         name = "frontend"
-        image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}"
+        image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}:${var.backend_dev_image_tag}"
         essential = true
         portMappings = [{ containerPort = 80, protocol = "tcp" }]
   }])
@@ -69,7 +69,7 @@ resource "aws_ecs_task_definition" "iac-dtap-frontend-prod"{
 
     container_definitions = jsonencode([{
         name = "frontend"
-        image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}"
+        image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}:${var.frontend_dev_image_tag}"
         essential = true
         portMappings = [{ containerPort = 80, protocol = "tcp" }]
   }])

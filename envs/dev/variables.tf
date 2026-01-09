@@ -80,14 +80,11 @@ variable "soar_email" {
   default     = "example@dtap.local"
 }
 
-//Variables for task definitions
-variable "frontend_bootstrap_task_definition_arn" {
+variable "backend_dev_image_tag" {
   type = string
-  description = "Initial frontend task definition ARN used only to create the ECS service"
-  default = ""
+  default = "latest"
 }
-variable "backend_bootstrap_task_definition_arn" {
+variable "frontend_dev_image_tag" {
   type = string
-  description = "Initial backend task definition ARN used only to create the ECS service"
-  default = ""
+  default = "latest"
 }
