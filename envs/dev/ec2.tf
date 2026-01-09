@@ -50,7 +50,7 @@ resource "aws_autoscaling_group" "app" {
     version = "$Latest"
   }
 
-  target_group_arns = [aws_lb_target_group.app_tg.arn]
+  target_group_arns = [aws_alb_target_group.app_tg.arn]
 
   tag {
     key                 = "Name"

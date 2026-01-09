@@ -16,8 +16,8 @@ resource "aws_route53_record" "app_internal" {
   type    = "A"
 
   alias {
-    name                   = aws_lb.app_alb.dns_name
-    zone_id                = aws_lb.app_alb.zone_id
+    name                   = aws_alb.app_alb.dns_name
+    zone_id                = aws_alb.app_alb.zone_id
     evaluate_target_health = true
   }
 }

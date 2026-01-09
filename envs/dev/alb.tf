@@ -12,7 +12,7 @@ resource "aws_alb" "app_alb" {
 }
 
 // Target group for app instances
-resource "aws_lb_target_group" "app_tg" {
+resource "aws_alb_target_group" "app_tg" {
   name     = "${var.project}-app-tg"
   port     = 80
   protocol = "HTTP"
@@ -31,14 +31,14 @@ resource "aws_lb_target_group" "app_tg" {
 }
 
 // HTTP listener forwards to target group
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.app_alb.arn
+resource "aws_alb_listener" "http" {
+  load_balancer_arn = aws_alb.app_alb.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg.arn
+    target_group_arn = aws_alb_target_group.app_tg.arn
   }
 }
 //New ALB for the backend ECS
