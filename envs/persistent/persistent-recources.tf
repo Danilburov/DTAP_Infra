@@ -17,7 +17,7 @@ resource "aws_eip" "vpn_eip" {
 
 # VPN PKI S3 Bucket - persistent across main stack lifecycle
 resource "aws_s3_bucket" "vpn_pki" {
-  bucket        = "${var.project}-vpn-pki"
+  bucket        = "dtap-vpn-pki"
   force_destroy = false # Prevent accidental deletion
   tags          = var.tags
 
@@ -52,4 +52,3 @@ resource "aws_s3_bucket" "vpn_pki" {
   #   restrict_public_buckets = true
   # }
 }
-
