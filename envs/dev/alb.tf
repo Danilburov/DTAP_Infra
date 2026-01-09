@@ -1,7 +1,7 @@
 // Application Load Balancer, target group, and listener
 
 // Internet-facing ALB in public subnets
-resource "aws_lb" "app_alb" {
+resource "aws_alb" "app_alb" {
   name               = "${var.project}-app-alb"
   internal           = false
   load_balancer_type = "application"
@@ -100,7 +100,7 @@ resource "aws_alb_target_group" "dtap-frontend-tg"{
 
 //listener for the frontend target group
 resource "aws_alb_listener" "dtap_frontend-http" {
-  load_balancer_arn = aws_alb.dtap-app_alb-alb.arn
+  load_balancer_arn = aws_alb.app_alb.arn
   port = 80
   protocol = "HTTP"
   
