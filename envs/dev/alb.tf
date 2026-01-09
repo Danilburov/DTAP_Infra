@@ -56,6 +56,7 @@ resource "aws_alb_target_group" "dtap-backend-tg"{
   port = 8080
   protocol = "HTTP"
   vpc_id = aws_vpc.main.id
+  target_type = "ip" //This is added manually, the default is 'instance' and to be able to wire it to the task definitions to create the ECS service it needs to be taget type 'ip' because of the 'awsvpc' protocol
 
   health_check {
     path = "/health"
@@ -76,5 +77,35 @@ resource "aws_alb_listener" "dtap_backend-http" {
   default_action {
     type = "forward"
     target_group_arn = aws_alb_target_group.dtap-backend-tg.arn
+  }
+}
+
+//Created a separate target group for the frontend
+resource "aws_alb_target_group" "dtap-frontend-tg"{
+  name = "dtap-backend-tg"
+  port = 80
+  protocol = "HTTP"
+  vpc_id = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    path = "/"
+    matcher = "200"
+    healthy_threshold = 2
+    unhealthy_threshold = 2
+    interval = 30
+    timeout = 5
+  } 
+}
+
+//listener for the frontend target group
+resource "aws_alb_listener" "dtap_frontend-http" {
+  load_balancer_arn = aws_alb.dtap-app_alb-alb.arn
+  port = 80
+  protocol = "HTTP"
+  
+  default_action {
+    type = "forward"
+    target_group_arn = aws_alb_target_group.dtap-frontend-tg
   }
 }
