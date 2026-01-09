@@ -1,4 +1,4 @@
-//Roles for the creation of a task definition
+//First Roles for the creation of a task definition
 resource "aws_iam_role" "ecs_execution" {
     name = "dtap-ecs-execution-role"
 
@@ -33,9 +33,7 @@ resource "aws_iam_role" "ecs_task" {
   })
 }
 
-
-
-//First I will create the task definitions for each ECR that I registered
+//Then I will create the task definitions for each ECR that I registered
 resource "aws_ecs_task_definition" "iac-dtap-frontend-dev"{
     family = "iac-dtap-frontend-dev"
     requires_compatibilities = ["FARGATE"]
@@ -53,23 +51,44 @@ resource "aws_ecs_task_definition" "iac-dtap-frontend-dev"{
         portMappings = [{ containerPort = 80, protocol = "tcp" }]
   }])
 }
-resource "aws_ecs_task_definition" "iac-dtap-backend-dev"{
-    family = "iac-dtap-backend-dev"
-    requires_compatibilities = ["FARGATE"]
-    network_mode = "awsvpc"
-    cpu = "256"
-    memory = "512"
+resource "aws_ecs_task_definition" "iac-dtap-backend-dev" {
+  family = "iac-dtap-backend-dev"
+  requires_compatibilities = ["FARGATE"]
+  network_mode = "awsvpc"
+  cpu = "256"
+  memory = "512"
 
-    execution_role_arn = aws_iam_role.ecs_execution.arn
-    task_role_arn = aws_iam_role.ecs_task.arn
+  execution_role_arn = aws_iam_role.ecs_execution.arn
+  task_role_arn = aws_iam_role.ecs_task.arn
 
-    container_definitions = jsonencode([{
-        name = "frontend"
-        image = "${aws_ecr_repository.iac-dtap-backend-dev.repository_url}"
-        essential = true
-        portMappings = [{ containerPort = 8080, protocol = "tcp" }]
-  }])
+  container_definitions = jsonencode([
+    {
+      name = "backend"
+      image = aws_ecr_repository.iac-dtap-backend-dev.repository_url
+      essential = true
+
+      portMappings = [{
+          containerPort = 8080
+          protocol = "tcp"
+        }]
+      environment = [
+        {
+          name = "SPRING_DATASOURCE_URL"
+          value = "jdbc:postgresql://dtap-db.cxciqio0qcm4.eu-central-1.rds.amazonaws.com:5432/postgres"
+        },
+        {
+          name = "SPRING_DATASOURCE_USERNAME"
+          value = "postgres"
+        },
+        {
+          name  = "SPRING_DATASOURCE_PASSWORD"
+          value = "rWahgRZsoLHKAJHxquwvGsCLs"
+        }
+      ]
+    }
+  ])
 }
+
 # resource "aws_ecs_task_definition" "iac-dtap-backend-dev"{
 #     family = "iac-dtap-backend-dev"
 #     requires_compatibilities = ["FARGATE"]
