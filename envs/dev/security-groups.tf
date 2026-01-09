@@ -93,6 +93,13 @@ resource "aws_security_group" "rds_sg" {
     protocol        = "tcp"
     security_groups = [aws_security_group.app_sg.id]
   }
+  ingress{
+    description = "Open connection" //Bad practise, I am just opening it for accessibility and easy testing
+    from_port = 5432
+    to_port = 5432
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   egress {
     from_port   = 0
