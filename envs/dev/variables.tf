@@ -84,8 +84,10 @@ variable "soar_email" {
 variable "frontend_bootstrap_task_definition_arn" {
   type = string
   description = "Initial frontend task definition ARN used only to create the ECS service"
+  default = ""
 }
 variable "backend_bootstrap_task_definition_arn" {
   type = string
   description = "Initial backend task definition ARN used only to create the ECS service"
+  default = ""
 }
