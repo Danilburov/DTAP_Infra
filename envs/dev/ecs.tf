@@ -10,7 +10,7 @@ resource "aws_ecs_cluster" "backend"{
     name = "dtap-backend-cluster"
 
     setting{
-        name = "containerInsight"
+        name = "containerInsights"
         value = "enabled"
     }
 }
