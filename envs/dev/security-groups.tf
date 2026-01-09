@@ -24,7 +24,7 @@ resource "aws_security_group" "alb_sg" {
 
   tags = merge(var.tags, { Name = "${var.project}-alb-sg" })
 }
-//Created a new SG for the backend ALB
+//Created a new SG for the backend ALB and frontend ALB
 resource "aws_security_group" "dtap-backend-alb-sg"{
   name = "dtap-backend-alb-sg"
   description = "SG for the backend ALB"
@@ -38,6 +38,13 @@ resource "aws_security_group" "dtap-backend-alb-sg"{
     cidr_blocks = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+  ingress{
+    description = "Open connection" //Bad practise, I am just opening it for accessibility and easy testing
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     from_port = 0
     to_port = 0
@@ -45,7 +52,33 @@ resource "aws_security_group" "dtap-backend-alb-sg"{
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+resource "aws_security_group" "dtap-frontend-alb-sg"{
+  name = "dtap-frontend-alb-sg"
+  description = "SG for the frontend ALB"
+  vpc_id = aws_vpc.main.id
 
+  ingress {
+    description = "HTTP"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+    ingress{
+    description = "Open connection" //Bad practise, I am just opening it for accessibility and easy testing
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 // App SG: allow HTTP from ALB and node_exporter from monitoring
 resource "aws_security_group" "app_sg" {
   name        = "${var.project}-app-sg"

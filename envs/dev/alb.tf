@@ -79,9 +79,15 @@ resource "aws_alb_listener" "dtap_backend-http" {
     target_group_arn = aws_alb_target_group.dtap-backend-tg.arn
   }
 }
-
-resource "aws_lb_target_group" "dtap-frontend-tg"{
-  name = "dtap-backend-tg"
+resource "aws_alb" "dtap-frontend-alb" {
+  name = "dtap-frontend-alb"
+  internal = false
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.dtap-frontend-alb-sg.id]
+  subnets = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+}
+resource "aws_alb_target_group" "dtap-frontend-tg"{
+  name = "dtap-frontend-tg"
   port = 80
   protocol = "HTTP"
   vpc_id = aws_vpc.main.id
@@ -97,12 +103,12 @@ resource "aws_lb_target_group" "dtap-frontend-tg"{
   } 
 }
 resource "aws_alb_listener" "dtap_frontend-http" {
-  load_balancer_arn = aws_lb.app_alb.arn
+  load_balancer_arn = aws_alb.dtap-frontend-alb.arn
   port = 80
   protocol = "HTTP"
   
   default_action {
     type = "forward"
-    target_group_arn = aws_lb_target_group.dtap-frontend-tg.arn
+    target_group_arn = aws_alb_target_group.dtap-frontend-tg.arn
   }
 }
