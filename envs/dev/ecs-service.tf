@@ -36,15 +36,40 @@ resource "aws_iam_role" "ecs_task" {
 
 
 //First I will create the task definitions for each ECR that I registered
-# resource "aws_ecs_task_definition" "frontend_bootstrap"{
-#     family = "iac-dtap-frontend"
-#     requires_compatibilities = ["FARGATE"]
-#     network_mode = "awsvpc"
-#     cpu = "256"
-#     memory = "512"
+resource "aws_ecs_task_definition" "iac-dtap-frontend-dev"{
+    family = "iac-dtap-frontend-dev"
+    requires_compatibilities = ["FARGATE"]
+    network_mode = "awsvpc"
+    cpu = "256"
+    memory = "512"
 
-#     execution_role_arn = aws_iam_role.ecs_execution.arn
-# }
+    execution_role_arn = aws_iam_role.ecs_execution.arn
+    task_role_arn = aws_iam_role.ecs_task.arn
+
+    container_definitions = jsonencode([{
+        name = "frontend"
+        image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}"
+        essential = true
+        portMappings = [{ containerPort = 80, protocol = "tcp" }]
+  }])
+}
+resource "aws_ecs_task_definition" "iac-dtap-backend-dev"{
+    family = "iac-dtap-backend-dev"
+    requires_compatibilities = ["FARGATE"]
+    network_mode = "awsvpc"
+    cpu = "256"
+    memory = "512"
+
+    execution_role_arn = aws_iam_role.ecs_execution.arn
+    task_role_arn = aws_iam_role.ecs_task.arn
+
+    container_definitions = jsonencode([{
+        name = "frontend"
+        image = "${aws_ecr_repository.iac-dtap-backend-dev.repository_url}"
+        essential = true
+        portMappings = [{ containerPort = 8080, protocol = "tcp" }]
+  }])
+}
 # resource "aws_ecs_task_definition" "iac-dtap-backend-dev"{
 #     family = "iac-dtap-backend-dev"
 #     requires_compatibilities = ["FARGATE"]
