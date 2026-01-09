@@ -1,56 +1,65 @@
-// Monitoring: subnet, SG, IAM, instance with Prometheus and Grafana
+# =========================
+# AMI voor Ubuntu 22.04
+# =========================
+data "aws_ami" "ubuntu" {
+  most_recent = true
 
-// Monitoring subnet CIDR
-locals {
-  monitoring_cidr = "10.0.50.0/24"
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu*22.04*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  owners = ["099720109477"]
 }
 
-// Subnet for monitoring in AZ A associated to private route table
-resource "aws_subnet" "monitoring_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = local.monitoring_cidr
-  availability_zone = local.az_a
-
-  tags = merge(var.tags, {
-    Name = "${var.project}-monitoring-a"
-    Tier = "monitoring"
-  })
-}
-
-resource "aws_route_table_association" "monitoring_a_private" {
-  subnet_id      = aws_subnet.monitoring_a.id
-  route_table_id = aws_route_table.private.id
-}
-
-// Security group for monitoring
+################################
+# SECURITY GROUP
+################################
 resource "aws_security_group" "monitoring_sg" {
-  name        = "${var.project}-monitoring-sg"
-  description = "Monitoring SG"
-  vpc_id      = aws_vpc.main.id
+  name   = "monitoring-sg"
+  vpc_id = aws_vpc.main.id
 
-  // Allow Grafana 3000 and Prometheus 9090 from VPN and VPN SG
   ingress {
-    from_port       = 3000
-    to_port         = 3000
-    protocol        = "tcp"
-    cidr_blocks     = ["10.8.0.0/24"]
+    description = "SSH (internal)"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
     security_groups = [aws_security_group.vpn.id]
   }
 
   ingress {
-    from_port       = 9090
-    to_port         = 9090
-    protocol        = "tcp"
-    cidr_blocks     = ["10.8.0.0/24"]
+    description = "Grafana"
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
     security_groups = [aws_security_group.vpn.id]
   }
 
-  // Optional SSH from VPN SG
+  # Allow VPN client subnet (OpenVPN tun) to reach monitoring services
   ingress {
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    security_groups = [aws_security_group.vpn.id]
+    description = "SSH from VPN clients"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.8.0.0/24"]
+  }
+
+  ingress {
+    description = "Grafana from VPN clients"
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["10.8.0.0/24"]
   }
 
   egress {
@@ -60,71 +69,46 @@ resource "aws_security_group" "monitoring_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(var.tags, { Name = "${var.project}-monitoring-sg" })
-}
-
-// AMI for monitoring host
-data "aws_ami" "al2023_monitoring" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
+  tags = {
+    Name = "monitoring-sg"
   }
 }
 
-// Prometheus config content
-locals {
-  prometheus_yml = <<-YAML
-    global:
-      scrape_interval: 15s
-
-    scrape_configs:
-      - job_name: 'prometheus'
-        static_configs:
-          - targets: ['localhost:9090']
-
-      - job_name: 'node'
-        ec2_sd_configs:
-          - region: ${var.region}
-            port: 9100
-        relabel_configs:
-          - source_labels: [__meta_ec2_tag_Name]
-            regex: "${var.project}-app"
-            action: keep
-          - source_labels: [__meta_ec2_instance_state]
-            regex: running
-            action: keep
-  YAML
+################################
+# S3 DASHBOARD
+################################
+resource "random_id" "suffix" {
+  byte_length = 4
 }
 
-// User data to install Docker, Prometheus, Grafana
-locals {
-  monitoring_user_data = <<-BASH
-    #!/usr/bin/env bash
-    set -eux
-    dnf update -y
-    dnf install -y docker
-    systemctl enable --now docker
-
-    mkdir -p /etc/prometheus
-    cat > /etc/prometheus/prometheus.yml << 'EOF'
-    ${local.prometheus_yml}
-    EOF
-
-    docker run -d --name grafana -p 3000:3000 \
-      -e GF_SECURITY_ADMIN_PASSWORD=admin --restart unless-stopped grafana/grafana:10.4.3
-
-    docker run -d --name prometheus -p 9090:9090 \
-      -v /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro \
-      --restart unless-stopped prom/prometheus:v2.55.1 \
-      --config.file=/etc/prometheus/prometheus.yml
-  BASH
+resource "aws_s3_bucket" "dashboards" {
+  bucket = "grafana-dashboards-${random_id.suffix.hex}"
 }
 
-// IAM role allowing EC2 describe for service discovery
-data "aws_iam_policy_document" "monitoring_assume" {
+resource "aws_s3_object" "dashboard" {
+  bucket       = aws_s3_bucket.dashboards.bucket
+  key          = "dashboards/cloudwatch_dashboard.json"
+  source       = "${path.module}/grafana_dashboard.json"
+  content_type = "application/json"
+}
+
+################################
+# SNS
+################################
+resource "aws_sns_topic" "alerts" {
+  name = "monitoring-alerts"
+}
+
+resource "aws_sns_topic_subscription" "email" {
+  topic_arn = aws_sns_topic.alerts.arn
+  protocol  = "email"
+  endpoint  = var.alert_email
+}
+
+################################
+# IAM
+################################
+data "aws_iam_policy_document" "assume_ec2" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -134,46 +118,82 @@ data "aws_iam_policy_document" "monitoring_assume" {
   }
 }
 
-resource "aws_iam_role" "monitoring_role" {
-  name               = "${var.project}-monitoring-role"
-  assume_role_policy = data.aws_iam_policy_document.monitoring_assume.json
+resource "aws_iam_role" "monitoring" {
+  name               = "monitoring-role"
+  assume_role_policy = data.aws_iam_policy_document.assume_ec2.json
 }
 
-data "aws_iam_policy_document" "monitoring_inline" {
+data "aws_iam_policy_document" "monitoring_policy" {
   statement {
-    actions   = ["ec2:DescribeInstances", "ec2:DescribeTags"]
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.dashboards.arn}/*"]
+  }
+
+  statement {
+    actions   = ["sns:Publish"]
+    resources = [aws_sns_topic.alerts.arn]
+  }
+
+  statement {
+    actions = [
+      "cloudwatch:GetMetricStatistics",
+      "cloudwatch:ListMetrics",
+      "cloudwatch:PutMetricData",
+      "cloudwatch:GetMetricData"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "ec2:DescribeInstances",
+      "ec2:DescribeTags"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "rds:DescribeDBInstances",
+      "rds:ListTagsForResource"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:DescribeTags"
+    ]
     resources = ["*"]
   }
 }
 
-resource "aws_iam_role_policy" "monitoring_policy" {
-  name   = "${var.project}-monitoring-ec2-describe"
-  role   = aws_iam_role.monitoring_role.id
-  policy = data.aws_iam_policy_document.monitoring_inline.json
+resource "aws_iam_role_policy" "monitoring" {
+  role   = aws_iam_role.monitoring.id
+  policy = data.aws_iam_policy_document.monitoring_policy.json
 }
 
-resource "aws_iam_instance_profile" "monitoring_profile" {
-  name = "${var.project}-monitoring-profile"
-  role = aws_iam_role.monitoring_role.name
+resource "aws_iam_instance_profile" "monitoring" {
+  name = "monitoring-profile"
+  role = aws_iam_role.monitoring.name
 }
 
-// Monitoring instance without public IP
+################################
+# EC2 ALL-IN-ONE MONITORING
+################################
 resource "aws_instance" "monitoring" {
-  ami                         = data.aws_ami.al2023_monitoring.id
-  instance_type               = var.app_instance_type
-  subnet_id                   = aws_subnet.monitoring_a.id
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = "t3.micro"
+  subnet_id                   = aws_subnet.private_monitoring_a.id
   vpc_security_group_ids      = [aws_security_group.monitoring_sg.id]
-  associate_public_ip_address = false
   key_name                    = var.key_name
-  iam_instance_profile        = aws_iam_instance_profile.monitoring_profile.name
-  user_data                   = local.monitoring_user_data
+  iam_instance_profile        = aws_iam_instance_profile.monitoring.name
+  associate_public_ip_address = false
 
-  root_block_device {
-    volume_type = "gp3"
-    volume_size = 30
+  user_data = file("monitoring-userdata.sh")
+
+  tags = {
+    Name = "dtap-monitoring"
   }
-
-  tags = merge(var.tags, { Name = "${var.project}-monitoring" })
 }
-
-

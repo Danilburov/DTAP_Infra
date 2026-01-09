@@ -80,6 +80,12 @@ variable "soar_email" {
   default     = "example@dtap.local"
 }
 
+variable "alert_email" {
+  type        = string
+  description = "Notification email placeholder"
+  default     = "example@dtap.local"
+}
+
 //Duplicates
 
 # variable "project" {
