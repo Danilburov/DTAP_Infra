@@ -38,13 +38,6 @@ resource "aws_security_group" "dtap-backend-alb-sg"{
     cidr_blocks = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
-  ingress{
-    description = "Open connection" //Bad practise, I am just opening it for accessibility and easy testing
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
   egress {
     from_port = 0
     to_port = 0
@@ -64,13 +57,6 @@ resource "aws_security_group" "dtap-frontend-alb-sg"{
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
-  }
-    ingress{
-    description = "Open connection" //Bad practise, I am just opening it for accessibility and easy testing
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     from_port = 0
