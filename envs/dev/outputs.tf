@@ -3,7 +3,7 @@
 // ALB DNS name
 output "alb_dns_name" {
   description = "ALB DNS name"
-  value       = aws_alb.app_alb.dns_name
+  value       = aws_lb.app_alb.dns_name
 }
 
 // RDS endpoint
@@ -29,4 +29,3 @@ output "monitoring_private_ip" {
   description = "Monitoring instance private IP"
   value       = aws_instance.monitoring.private_ip
 }
-

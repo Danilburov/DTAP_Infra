@@ -1,7 +1,7 @@
 // Application Load Balancer, target group, and listener
 
 // Internet-facing ALB in public subnets
-resource "aws_alb" "app_alb" {
+resource "aws_lb" "app_alb" {
   name               = "${var.project}-app-alb"
   internal           = false
   load_balancer_type = "application"
@@ -12,7 +12,7 @@ resource "aws_alb" "app_alb" {
 }
 
 // Target group for app instances
-resource "aws_alb_target_group" "app_tg" {
+resource "aws_lb_target_group" "app_tg" {
   name     = "${var.project}-app-tg"
   port     = 80
   protocol = "HTTP"
@@ -31,14 +31,14 @@ resource "aws_alb_target_group" "app_tg" {
 }
 
 // HTTP listener forwards to target group
-resource "aws_alb_listener" "http" {
-  load_balancer_arn = aws_alb.app_alb.arn
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.app_alb.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_alb_target_group.app_tg.arn
+    target_group_arn = aws_lb_target_group.app_tg.arn
   }
 }
 //New ALB for the backend ECS
@@ -80,8 +80,7 @@ resource "aws_alb_listener" "dtap_backend-http" {
   }
 }
 
-//Created a separate target group for the frontend
-resource "aws_alb_target_group" "dtap-frontend-tg"{
+resource "aws_lb_target_group" "dtap-frontend-tg"{
   name = "dtap-backend-tg"
   port = 80
   protocol = "HTTP"
@@ -97,15 +96,13 @@ resource "aws_alb_target_group" "dtap-frontend-tg"{
     timeout = 5
   } 
 }
-
-//listener for the frontend target group
 resource "aws_alb_listener" "dtap_frontend-http" {
-  load_balancer_arn = aws_alb.app_alb.arn
+  load_balancer_arn = aws_lb.dtap-app_alb.arn
   port = 80
   protocol = "HTTP"
   
   default_action {
     type = "forward"
-    target_group_arn = aws_alb_target_group.dtap-frontend-tg.arn
+    target_group_arn = aws_lb_target_group.dtap-frontend-tg.arn
   }
 }
