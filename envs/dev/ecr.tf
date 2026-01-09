@@ -27,7 +27,7 @@ resource "aws_ecr_repository" "iac-dtap-frontend-dev"{
     }
 }
 resource "aws_ecr_repository" "iac-dtap-frontend-prod"{
-    name = "iac-frontend-prod"
+    name = "iac-dtap-frontend-prod"
     image_tag_mutability = "MUTABLE"
     force_delete = true
 
