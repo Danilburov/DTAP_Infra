@@ -22,9 +22,9 @@ resource "aws_lb_target_group" "app_tg" {
     path                = "/"
     matcher             = "200-399"
     healthy_threshold   = 2
-    unhealthy_threshold = 2
-    interval            = 30
-    timeout             = 5
+    unhealthy_threshold = 5
+    interval            = 60
+    timeout             = 15
   }
 
   tags = merge(var.tags, { Name = "${var.project}-app-tg" })
@@ -62,9 +62,9 @@ resource "aws_alb_target_group" "dtap-backend-tg"{
     path = "/health"
     matcher = "200"
     healthy_threshold = 2
-    unhealthy_threshold = 2
-    interval = 30
-    timeout = 5
+    unhealthy_threshold = 5
+    interval = 60
+    timeout = 15
   } 
 }
 
@@ -97,9 +97,9 @@ resource "aws_alb_target_group" "dtap-frontend-tg"{
     path = "/"
     matcher = "200"
     healthy_threshold = 2
-    unhealthy_threshold = 2
-    interval = 30
-    timeout = 5
+    unhealthy_threshold = 5
+    interval = 60
+    timeout = 15
   } 
 }
 resource "aws_alb_listener" "dtap_frontend-http" {
