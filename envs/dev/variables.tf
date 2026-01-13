@@ -63,7 +63,7 @@ variable "my_ip_cidr" {
 variable "key_name" {
   type        = string
   description = "EC2 key pair name"
-  default     = "MarwanKeypair"
+  default     = "alpvpnpair"
 }
 
 // VPN instance type
@@ -78,12 +78,6 @@ variable "soar_email" {
   type        = string
   description = "Notification email placeholder"
   default     = "example@dtap.local"
-}
-
-variable "alert_email" {
-  type        = string
-  description = "Notification email"
-  default     = "562196@student.fontys.nl"
 }
 
 variable "backend_dev_image_tag" {

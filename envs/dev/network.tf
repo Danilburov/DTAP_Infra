@@ -10,13 +10,12 @@ locals {
   az_a = data.aws_availability_zones.this.names[0]
   az_b = data.aws_availability_zones.this.names[1]
 
-  public_cidr_a         = "10.0.1.0/24"
-  public_cidr_b         = "10.0.11.0/24"
-  private_app_cidr_a    = "10.0.2.0/24"
-  private_app_cidr_b    = "10.0.12.0/24"
-  private_data_cidr_a   = "10.0.3.0/24"
-  private_data_cidr_b   = "10.0.13.0/24"
-  private_monitoring_cidr_a = "10.0.50.0/24"
+  public_cidr_a       = "10.0.1.0/24"
+  public_cidr_b       = "10.0.11.0/24"
+  private_app_cidr_a  = "10.0.2.0/24"
+  private_app_cidr_b  = "10.0.12.0/24"
+  private_data_cidr_a = "10.0.3.0/24"
+  private_data_cidr_b = "10.0.13.0/24"
 }
 
 // VPC with DNS enabled
@@ -110,18 +109,6 @@ resource "aws_subnet" "private_data_b" {
   })
 }
 
-// Private monitoring subnet
-resource "aws_subnet" "private_monitoring_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = local.private_monitoring_cidr_a
-  availability_zone = local.az_a
-
-  tags = merge(var.tags, {
-    Name = "${var.project}-monitoring-a"
-    Tier = "monitoring"
-  })
-}
-
 // Public route table and default route to Internet
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
@@ -199,11 +186,6 @@ resource "aws_route_table_association" "data_a" {
 
 resource "aws_route_table_association" "data_b" {
   subnet_id      = aws_subnet.private_data_b.id
-  route_table_id = aws_route_table.private.id
-}
-
-resource "aws_route_table_association" "monitoring_a" {
-  subnet_id      = aws_subnet.private_monitoring_a.id
   route_table_id = aws_route_table.private.id
 }
 
