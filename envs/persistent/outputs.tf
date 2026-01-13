@@ -17,4 +17,3 @@ output "vpn_pki_bucket_arn" {
   description = "ARN of the VPN PKI S3 bucket"
   value       = aws_s3_bucket.vpn_pki.arn
 }
-

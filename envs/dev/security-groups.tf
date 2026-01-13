@@ -130,6 +130,40 @@ resource "aws_security_group" "rds_sg" {
   tags = merge(var.tags, { Name = "${var.project}-rds-sg" })
 }
 
+# =========================
+# Security Group voor OpenVPN Server
+# =========================
+resource "aws_security_group" "vpn" {
+  name        = "${var.project}-vpn-sg"
+  description = "Allow SSH and OpenVPN"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "OpenVPN UDP 1194"
+    from_port   = 1194
+    to_port     = 1194
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "openvpn-sg" }
+}
+
 //SGs for both the frontend-dev/prod and backend-dev/prod ECS services
 resource "aws_security_group" "ecs_service_backend_sg" {
   name = "ecs_service_backend_sg"

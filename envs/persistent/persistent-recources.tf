@@ -52,4 +52,3 @@ resource "aws_s3_bucket" "vpn_pki" {
   #   restrict_public_buckets = true
   # }
 }
-
