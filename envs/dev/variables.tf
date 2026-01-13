@@ -86,3 +86,11 @@ variable "alert_email" {
   default     = "562196@student.fontys.nl"
 }
 
+variable "backend_dev_image_tag" {
+  type = string
+  default = "latest"
+}
+variable "frontend_dev_image_tag" {
+  type = string
+  default = "latest"
+}
