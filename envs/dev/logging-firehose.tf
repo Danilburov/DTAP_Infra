@@ -51,10 +51,12 @@ resource "aws_kinesis_firehose_delivery_stream" "ecs_app_logs" {
 
   extended_s3_configuration {
     role_arn = aws_iam_role.firehose_role.arn
-    bucket_arn =  aws_s3_bucket.ecs_app_logs.arn
+    bucket_arn = aws_s3_bucket.ecs_app_logs.arn
+
     prefix = "ecs/app/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/"
+    error_output_prefix = "ecs/app-errors/!{timestamp:yyyy}/!{timestamp:MM}/!{timestamp:dd}/"
     compression_format = "GZIP"
     buffering_interval = 60
-    buffering_size = 5
+    buffering_size     = 5
   }
 }
