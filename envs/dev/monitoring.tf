@@ -122,41 +122,6 @@ locals {
       --config.file=/etc/prometheus/prometheus.yml
   BASH
 }
-
-// IAM role allowing EC2 describe for service discovery
-data "aws_iam_policy_document" "monitoring_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "monitoring_role" {
-  name               = "${var.project}-monitoring-role"
-  assume_role_policy = data.aws_iam_policy_document.monitoring_assume.json
-}
-
-data "aws_iam_policy_document" "monitoring_inline" {
-  statement {
-    actions   = ["ec2:DescribeInstances", "ec2:DescribeTags"]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_role_policy" "monitoring_policy" {
-  name   = "${var.project}-monitoring-ec2-describe"
-  role   = aws_iam_role.monitoring_role.id
-  policy = data.aws_iam_policy_document.monitoring_inline.json
-}
-
-resource "aws_iam_instance_profile" "monitoring_profile" {
-  name = "${var.project}-monitoring-profile"
-  role = aws_iam_role.monitoring_role.name
-}
-
 // Monitoring instance without public IP
 resource "aws_instance" "monitoring" {
   ami                         = data.aws_ami.al2023_monitoring.id

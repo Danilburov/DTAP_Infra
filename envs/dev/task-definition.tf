@@ -1,38 +1,3 @@
-//First Roles for the creation of a task definition
-resource "aws_iam_role" "ecs_execution" {
-    name = "dtap-ecs-execution-role"
-
-    assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
-  role = aws_iam_role.ecs_execution.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_iam_role" "ecs_task" {
-  name = "${var.project}-ecs-task-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
 //Then I will create the task definitions for each ECR that I registered
 
 //Both the dev and prod environments will use the same template image that I deployed via GitLab. This image is their project but quite behind and it is working for sure.

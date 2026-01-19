@@ -259,38 +259,3 @@ resource "aws_instance" "openvpn" {
 
 # S3 bucket is now in the persistent stack
 # Reference it via data.terraform_remote_state.persistent.outputs
-
-resource "aws_iam_role" "vpn_role" {
-  name = "${var.project}-vpn-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect    = "Allow",
-      Principal = { Service = "ec2.amazonaws.com" },
-      Action    = "sts:AssumeRole"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy" "vpn_s3_policy" {
-  name = "${var.project}-vpn-s3-policy"
-  role = aws_iam_role.vpn_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect   = "Allow",
-      Action   = ["s3:PutObject","s3:GetObject","s3:ListBucket"],
-      Resource = [
-        data.terraform_remote_state.persistent.outputs.vpn_pki_bucket_arn,
-        "${data.terraform_remote_state.persistent.outputs.vpn_pki_bucket_arn}/*"
-      ]
-    }]
-  })
-}
-
-resource "aws_iam_instance_profile" "vpn_profile" {
-  name = "${var.project}-vpn-profile"
-  role = aws_iam_role.vpn_role.name
-}
