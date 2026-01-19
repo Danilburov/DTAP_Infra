@@ -215,7 +215,7 @@ resource "aws_ecs_task_definition" "iac-dtap-backend-prod" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-region = var.aws.region
+          awslogs-region = var.region
           awslogs-group = aws_cloudwatch_log_group.firelens.name
           awslogs-stream-prefix = "firelens"
         }
