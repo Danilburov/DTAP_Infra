@@ -15,6 +15,25 @@ resource "aws_ecs_task_definition" "iac-dtap-frontend-dev"{
     task_role_arn = aws_iam_role.ecs_task.arn
 
     container_definitions = jsonencode([{
+    name = "log_router"
+    image = "public.ecr.aws/aws-observability/aws-for-fluent-bit:latest"
+    essential = true
+
+    firelensConfiguration = {
+      type = "fluentbit"
+      options = {
+        enable-ecs-log-metadata = "true"
+      }
+    }
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-region = var.region
+        awslogs-group = aws_cloudwatch_log_group.firelens.name
+        awslogs-stream-prefix = "firelens"
+      }
+    }
+  },{
         name = "frontend"
         image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}:${var.backend_dev_image_tag}"
         essential = true
@@ -31,12 +50,31 @@ resource "aws_ecs_task_definition" "iac-dtap-frontend-prod"{
 
     execution_role_arn = aws_iam_role.ecs_execution.arn
     task_role_arn = aws_iam_role.ecs_task.arn
+container_definitions = jsonencode([
+  {
+    name = "log_router"
+    image = "public.ecr.aws/aws-observability/aws-for-fluent-bit:latest"
+    essential = true
 
-    container_definitions = jsonencode([{
-        name = "frontend"
-        image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}:${var.frontend_dev_image_tag}"
-        essential = true
-        portMappings = [{ containerPort = 80, protocol = "tcp" }]
+    firelensConfiguration = {
+      type = "fluentbit"
+      options = {
+        enable-ecs-log-metadata = "true"
+      }
+    }
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-region = var.region
+        awslogs-group = aws_cloudwatch_log_group.firelens.name
+        awslogs-stream-prefix = "firelens"
+      }
+    }
+  },{
+      name = "frontend"
+      image = "${aws_ecr_repository.iac-dtap-frontend-dev.repository_url}:${var.frontend_dev_image_tag}"
+      essential = true
+      portMappings = [{ containerPort = 80, protocol = "tcp" }]
   }])
 }
 
@@ -117,7 +155,27 @@ resource "aws_ecs_task_definition" "iac-dtap-backend-prod" {
   execution_role_arn = aws_iam_role.ecs_execution.arn
   task_role_arn = aws_iam_role.ecs_task.arn
 
-  container_definitions = jsonencode([
+container_definitions = jsonencode([
+  {
+    name = "log_router"
+    image = "public.ecr.aws/aws-observability/aws-for-fluent-bit:latest"
+    essential = true
+
+    firelensConfiguration = {
+      type = "fluentbit"
+      options = {
+        enable-ecs-log-metadata = "true"
+      }
+    }
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-region = var.region
+        awslogs-group = aws_cloudwatch_log_group.firelens.name
+        awslogs-stream-prefix = "firelens"
+      }
+    }
+  },
     {
       name = "backend"
       image = aws_ecr_repository.iac-dtap-backend-dev.repository_url
