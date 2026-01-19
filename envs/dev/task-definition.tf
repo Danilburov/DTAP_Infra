@@ -225,7 +225,7 @@ resource "aws_ecs_task_definition" "iac-dtap-backend-prod" {
     # Backend container
     {
       name = "backend"
-      image = aws_ecr_repository.iac-dtap-backend-prod.repository_url
+      image = aws_ecr_repository.iac-dtap-backend-dev.repository_url
       essential = true
 
       portMappings = [{
