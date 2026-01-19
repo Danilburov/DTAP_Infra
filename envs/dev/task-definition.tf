@@ -51,32 +51,59 @@ resource "aws_ecs_task_definition" "iac-dtap-backend-dev" {
   execution_role_arn = aws_iam_role.ecs_execution.arn
   task_role_arn = aws_iam_role.ecs_task.arn
 
-  container_definitions = jsonencode([
-    {
-      name = "backend"
-      image = aws_ecr_repository.iac-dtap-backend-dev.repository_url
-      essential = true
+//Only change will be here for the task definitions, I need to ensure that the container logs are collected by Fluent bit
+container_definitions = jsonencode([
+  {
+    name = "log_router"
+    image = "public.ecr.aws/aws-observability/aws-for-fluent-bit:latest"
+    essential = true
 
-      portMappings = [{
-          containerPort = 8080
-          protocol = "tcp"
-        }]
-      environment = [
-        {
-          name = "SPRING_DATASOURCE_URL"
-          value = "jdbc:postgresql://dtap-db.cxciqio0qcm4.eu-central-1.rds.amazonaws.com:5432/postgres"
-        },
-        {
-          name = "SPRING_DATASOURCE_USERNAME"
-          value = "postgres"
-        },
-        {
-          name  = "SPRING_DATASOURCE_PASSWORD"
-          value = "rWahgRZsoLHKAJHxquwvGsCLs"
-        }
-      ]
+    firelensConfiguration = {
+      type = "fluentbit"
+      options = {
+        enable-ecs-log-metadata = "true"
+      }
     }
-  ])
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-region = var.region
+        awslogs-group = aws_cloudwatch_log_group.firelens.name
+        awslogs-stream-prefix = "firelens"
+      }
+    }
+  },
+  //the backend container is defined here
+  {
+    name = "backend"
+    image = aws_ecr_repository.iac-dtap-backend-dev.repository_url
+    essential = true
+
+    portMappings = [{
+      containerPort = 8080
+      protocol = "tcp"
+    }]
+
+    environment = [
+      { name = "SPRING_DATASOURCE_URL", value = "jdbc:postgresql://dtap-db.cxciqio0qcm4.eu-central-1.rds.amazonaws.com:5432/postgres" },
+      { name = "SPRING_DATASOURCE_USERNAME", value = "postgres" },
+      { name = "SPRING_DATASOURCE_PASSWORD", value = "rWahgRZsoLHKAJHxquwvGsCLs" }
+    ]
+
+    #here is the actual pipeline implementation: app logs - FireLens - Firehose - S3
+    logConfiguration = {
+      logDriver = "awsfirelens"
+      options = {
+        Name = "firehose"
+        region = var.region
+        delivery_stream = aws_kinesis_firehose_delivery_stream.ecs_app_logs.name
+      }
+    }
+    dependsOn = [
+      { containerName = "log_router", condition = "START" }
+    ]
+  }
+])
 }
 
 //DTAP-BACKEND-PROD Task definition

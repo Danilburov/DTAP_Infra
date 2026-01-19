@@ -24,3 +24,8 @@ resource "aws_kinesis_firehose_delivery_stream" "ecs_app_logs" {
     buffering_size     = 5
   }
 }
+//New cloudwatch group for firelens (Fluent bit)
+resource "aws_cloudwatch_log_group" "firelens" {
+  name = "/ecs/dtap/firelens"
+  retention_in_days = 7
+}
