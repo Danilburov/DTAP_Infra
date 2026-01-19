@@ -23,3 +23,13 @@ ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
 LOCATION 's3://${aws_s3_bucket.ecs_app_logs.bucket}/ecs/app/';
 EOF
 }
+//storage for the athena results
+resource "aws_athena_workgroup" "primary" {
+  name = "primary"
+
+  configuration {
+    result_configuration {
+      output_location = "s3://${aws_s3_bucket.athena_results.bucket}/athena-results/"
+    }
+  }
+}
