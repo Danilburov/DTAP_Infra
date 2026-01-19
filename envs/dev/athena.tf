@@ -24,8 +24,8 @@ LOCATION 's3://${aws_s3_bucket.ecs_app_logs.bucket}/ecs/app/';
 EOF
 }
 //storage for the athena results
-resource "aws_athena_workgroup" "primary" {
-  name = "primary"
+resource "aws_athena_workgroup" "dtap" {
+  name = "dtap-query-console"
 
   configuration {
     result_configuration {
