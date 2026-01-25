@@ -29,8 +29,12 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Terraform Init
-        run: terraform init -backend-config=backend.hcl
+      - name: Dev - Terraform Init
+        working-directory: envs/dev
+        run: |
+          terraform init \
+            -backend-config=backend.hcl \
+            -backend-config="key=envs/dev/terraform.tfstate"
 
       - name: Show Destroy plan
         run: terraform plan -destroy
